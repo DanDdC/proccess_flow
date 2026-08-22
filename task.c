@@ -18,6 +18,11 @@ int task_cadastrar(const char *nome, char **tokens, int ntokens){
         fprintf(stderr, "processflow: tarefa '%s' ja existe\n", nome);
         return -1;
     }
+    
+    if(ntokens<1){
+        fprintf(stderr, "processflow: uso: task <nome> <programa> [args]\n");
+        return -1;
+    }
 
     Task *t = buscar_slot_livre();
 

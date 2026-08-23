@@ -58,6 +58,15 @@ int main(int argc, char *argv[]){
             continue;
         }
 
+        if(ntokens>=2 && strcmp(tokens[0], "run")==0 && strcmp(tokens[1], "pipe")==0){ //dentro do run!
+            if(ntokens<4){ //pipe exige no mínimo 2 tarefas
+                fprintf(stderr, "processflow: uso: run pipe <nome> <nome>...\n");
+                continue;
+            }
+            exec_pipeline(&tokens[2], ntokens-2); //nomes começam depois de "run pipe"
+            continue;
+        }
+
         if(strcmp(tokens[0], "run")==0){
             if(ntokens>=2 && strcmp(tokens[1], "sequential")==0){
                 if(ntokens<3){ //palavra-chave + pelo menos 1 tarefa

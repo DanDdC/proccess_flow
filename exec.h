@@ -9,5 +9,7 @@
 #include "task.h"
 
 int exec_rodar(Task *t);
+int exec_sequencial(char **nomes, int n);
+int exec_paralelo(char **nomes, int n);
 
 #endif

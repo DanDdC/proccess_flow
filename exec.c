@@ -13,33 +13,39 @@ static void montar_argv(Task *t, char *argv[MAX_ARGS+1]){ //monta o formato que 
     argv[t->argc] = NULL;
 }
 
-int exec_rodar(Task *t){
+static pid_t lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai
     char *argv[MAX_ARGS+1];
     montar_argv(t, argv);
 
-    pid_t pid = fork(); //duplica o processo: daqui em diante existem dois
-
-    if(pid<0){ //fork falhou: nenhum filho nasceu
+    pid_t pid = fork();
+    if(pid<0){
         perror("processflow: fork");
         return -1;
     }
-
     if(pid==0){ //filho
-        execvp(argv[0], argv); //substitui o corpo pelo programa; só volta se falhar
+        execvp(argv[0], argv); //só volta se falhar
         fprintf(stderr, "processflow: %s: programa não encontrado\n", argv[0]);
-        _exit(127); //127 = convenção universal de "comando não encontrado"
+        _exit(127);
+    }
+    return pid; //só o pai chega nesta linha
+}
+
+int exec_rodar(Task *t){
+    pid_t pid = lancar(t);
+    if(pid<0){ //nem nasceu
+        return -1;
     }
 
-    int status; //daqui pra frente só o pai passa
+    int status;
     if(waitpid(pid, &status, 0)<0){ //espera ESTE filho terminar
         perror("processflow: waitpid");
         return -1;
     }
 
-    if(WIFEXITED(status)){ //terminou normal (exit/return)?
+    if(WIFEXITED(status)){
         return WEXITSTATUS(status); //devolve o código do filho
     }
-    return -1; //morreu por sinal (kill etc.)
+    return -1; //morreu por sinal
 }
 
 int exec_sequencial(char **nomes, int n){
@@ -50,6 +56,31 @@ int exec_sequencial(char **nomes, int n){
             continue;
         }
         exec_rodar(t);
+    }
+    return 0;
+}
+
+int exec_paralelo(char **nomes, int n){
+    int npids=0; //quantos filhos nasceram
+
+    for(int i=0; i<n; i++){ //fase 1: lança todos
+        Task *t = task_buscar(nomes[i]);
+        if(t==NULL){ //erro não-fatal
+            fprintf(stderr, "processflow: tarefa '%s' não existe\n", nomes[i]);
+            continue;
+        }
+        pid_t pid = lancar(t);
+        if(pid>0){
+            npids++;
+        }
+    }
+
+    for(int i=0; i<npids; i++){ //fase 2: colhe TODOS, em qualquer ordem
+        int status;
+        if(waitpid(-1, &status, 0)<0){ //-1: qualquer filho morto serve
+            perror("processflow: waitpid");
+            break;
+        }
     }
     return 0;
 }

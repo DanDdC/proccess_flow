@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "task.h"
+#include "exec.h"
 
 #define MAX_LINHA 1024
 #define MAX_TOKENS 32
@@ -56,7 +57,21 @@ int main(int argc, char *argv[]){
             task_cadastrar(tokens[1], &tokens[2], ntokens-2);
             continue;
         }
-        fprintf(stderr, "proccesflow: comando desconhecido %s\n", tokens[0]);
+
+        if(strcmp(tokens[0], "run")==0){
+            if(ntokens!=2){ //run aceita exatamente 1 nome
+                fprintf(stderr, "processflow: uso: run <nome>\n");
+                continue;
+            }
+            Task *t = task_buscar(tokens[1]);
+            if(t==NULL){ //erro não-fatal: avisa e continua
+                fprintf(stderr, "processflow: tarefa '%s' não existe\n", tokens[1]);
+                continue;
+            }
+            exec_rodar(t);
+            continue;
+        }
+        fprintf(stderr, "processflow: comando desconhecido %s\n", tokens[0]);
     }
 
     return 0;

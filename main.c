@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "task.h"
 #include "exec.h"
@@ -14,23 +15,38 @@ int main(int argc, char *argv[]){
     char linha[MAX_LINHA];
     char *tokens[MAX_TOKENS];
     int ntokens;
+    FILE *entrada = stdin; //fonte dos comandos: teclado por padrão
+    bool interativo = true;
 
     if(argc>2){ //erro: numero incorreto de argumentos
         fprintf(stderr, "uso: %s [workflowFile]\n", argv[0]);
         return 1;
     }
     if(argc==2){ //modo workflow
-        fprintf(stderr, "!!!!!!!!!!LEMBRAR DE COMPLETAR ESSE PEDACO DO CODIGO!!!!!!!!!!!!\n");
-        return 1;
+        entrada = fopen(argv[1], "r");
+        if(entrada==NULL){ //erro FATAL: encerra com código != 0
+            fprintf(stderr, "processflow: %s: não foi possível abrir o workflow\n", argv[1]);
+            return 1;
+        }
+        interativo = false;
     }
-
+    
     while(true){
-        printf("processflow> ");
-        fflush(stdout); //prompt sem \n: força exibir antes de ler
+        if(interativo){ //prompt só no modo interativo
+            printf("processflow> ");
+            fflush(stdout);
+        }
 
-        if(fgets(linha, sizeof(linha), stdin)==NULL){ //detecção de EOF
-            printf("\n");
+        if(fgets(linha, sizeof(linha), entrada)==NULL){ //EOF do teclado OU do arquivo
+            if(interativo){
+                printf("\n");
+            }
             break;
+        }
+
+        if(!interativo){ //workflow: ecoa a linha ANTES de processar
+            printf("%s", linha);
+            fflush(stdout); //garante que o eco sai ANTES da saída dos filhos
         }
 
         ntokens=0;
@@ -76,6 +92,17 @@ int main(int argc, char *argv[]){
             continue;
         }
 
+        if(strcmp(tokens[0], "workdir")==0){
+            if(ntokens!=2){ //exatamente 1 diretório
+                fprintf(stderr, "processflow: uso: workdir <diretório>\n");
+                continue;
+            }
+            if(chdir(tokens[1])<0){ //erro não-fatal: avisa e segue
+                fprintf(stderr, "processflow: %s: diretório não existe\n", tokens[1]);
+            }
+            continue;
+        }
+
         if(ntokens>=2 && strcmp(tokens[0], "run")==0 && strcmp(tokens[1], "pipe")==0){ //dentro do run!
             if(ntokens<4){ //pipe exige no mínimo 2 tarefas
                 fprintf(stderr, "processflow: uso: run pipe <nome> <nome>...\n");
@@ -115,6 +142,9 @@ int main(int argc, char *argv[]){
             continue;
         }
         fprintf(stderr, "processflow: comando desconhecido %s\n", tokens[0]);
+    }
+    if(entrada!=stdin){
+        fclose(entrada);
     }
     return 0;
 }

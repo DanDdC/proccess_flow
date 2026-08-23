@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include "task.h"
 
 #define MAX_LINHA 1024
 #define MAX_TOKENS 32
@@ -41,7 +43,20 @@ int main(int argc, char *argv[]){
         if(ntokens==0){
             continue;
         }
-        fprintf(stderr, "texto temporario %d\n", ntokens);
+
+        if(strcmp(tokens[0], "exit")==0){
+            break;
+        }
+
+        if(strcmp(tokens[0], "task")==0){
+            if(ntokens<3){ //minimo seria task + nome + programa
+                fprintf(stderr, "processflow: uso: task <nome> <programas> [args]\n");
+                continue;
+            }
+            task_cadastrar(tokens[1], &tokens[2], ntokens-2);
+            continue;
+        }
+        fprintf(stderr, "proccesflow: comando desconhecido %s\n", tokens[0]);
     }
 
     return 0;

@@ -1,6 +1,9 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #define MAX_TAREFAS 32

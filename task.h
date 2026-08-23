@@ -10,11 +10,15 @@
 #define MAX_NOME 64
 #define MAX_ARGS 32
 #define MAX_ARG_LEN 256
+#define MAX_ARQUIVO 256
 
 typedef struct{ //uma tarefa cadastrada
     char nome [MAX_NOME]; //chave de busca
     char args [MAX_ARGS][MAX_ARG_LEN]; //cópia dos tokens (args[0]=programa)
     int argc; //numero de strings válidas em args
+    char entrada[MAX_ARQUIVO]; //arquivo de stdin
+    char saida[MAX_ARQUIVO]; //arquivo de stdout
+    bool anexar; //false=sobrescreve, true=append
     bool ativa; //slot ocupado
 } Task;
 

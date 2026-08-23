@@ -1,4 +1,5 @@
 #include "exec.h"
+#include "redirect.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -23,6 +24,7 @@ static pid_t lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai
         return -1;
     }
     if(pid==0){ //filho
+        redirect_aplicar_filho(t); //religa stdin/stdout p/ arquivos, se configurados
         execvp(argv[0], argv); //só volta se falhar
         fprintf(stderr, "processflow: %s: programa não encontrado\n", argv[0]);
         _exit(127);

@@ -5,6 +5,7 @@
 
 #include "task.h"
 #include "exec.h"
+#include "redirect.h"
 
 #define MAX_LINHA 1024
 #define MAX_TOKENS 32
@@ -55,6 +56,23 @@ int main(int argc, char *argv[]){
                 continue;
             }
             task_cadastrar(tokens[1], &tokens[2], ntokens-2);
+            continue;
+        }
+
+        if(strcmp(tokens[0],"input")==0 || strcmp(tokens[0],"output")==0 || strcmp(tokens[0],"append")==0){
+            if(ntokens!=3){ //comando + tarefa + arquivo, exatos
+                fprintf(stderr, "processflow: uso: %s <tarefa> <arquivo>\n", tokens[0]);
+                continue;
+            }
+            if(strcmp(tokens[0],"input")==0){
+                redirect_input(tokens[1], tokens[2]);
+            }
+            else if(strcmp(tokens[0],"output")==0){
+                redirect_output(tokens[1], tokens[2]);
+            }
+            else{
+                redirect_append(tokens[1], tokens[2]); //sobra o append
+            }
             continue;
         }
 

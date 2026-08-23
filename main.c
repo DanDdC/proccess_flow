@@ -1,11 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
 #define MAX_LINHA 1024
+#define MAX_TOKENS 32
 
 int main(int argc, char *argv[]){
     char linha[MAX_LINHA];
+    char *tokens[MAX_TOKENS];
+    int ntokens;
 
     if(argc>2){ //erro: numero incorreto de argumentos
         fprintf(stderr, "uso: %s [workflowFile]\n", argv[0]);
@@ -25,7 +29,19 @@ int main(int argc, char *argv[]){
             break;
         }
 
-        printf("%s", linha); //eco temporário (so pra ver se ta funcionando)
+        ntokens=0;
+        char *tok=strtok(linha, " \t\n"); //primeira chamada
+        while(tok!=NULL && ntokens<MAX_TOKENS-1){
+            tokens[ntokens]=tok;
+            ntokens++;
+            tok=strtok(NULL, " \t\n");
+        }
+        tokens[ntokens]=NULL;
+
+        if(ntokens==0){
+            continue;
+        }
+        fprintf(stderr, "texto temporario %d\n", ntokens);
     }
 
     return 0;

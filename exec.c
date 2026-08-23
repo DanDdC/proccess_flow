@@ -41,3 +41,15 @@ int exec_rodar(Task *t){
     }
     return -1; //morreu por sinal (kill etc.)
 }
+
+int exec_sequencial(char **nomes, int n){
+    for(int i=0; i<n; i++){
+        Task *t = task_buscar(nomes[i]);
+        if(t==NULL){ //erro não-fatal: pula e continua a fila
+            fprintf(stderr, "processflow: tarefa '%s' não existe\n", nomes[i]);
+            continue;
+        }
+        exec_rodar(t);
+    }
+    return 0;
+}

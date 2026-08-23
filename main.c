@@ -59,7 +59,23 @@ int main(int argc, char *argv[]){
         }
 
         if(strcmp(tokens[0], "run")==0){
-            if(ntokens!=2){ //run aceita exatamente 1 nome
+            if(ntokens>=2 && strcmp(tokens[1], "sequential")==0){
+                if(ntokens<3){ //palavra-chave + pelo menos 1 tarefa
+                    fprintf(stderr, "processflow: uso: run sequential <nome>...\n");
+                    continue;
+                }
+                exec_sequencial(&tokens[2], ntokens-2);
+                continue;
+            }
+            if(ntokens>=2 && strcmp(tokens[1], "parallel")==0){
+                if(ntokens<3){
+                    fprintf(stderr, "processflow: uso: run parallel <nome>...\n");
+                    continue;
+                }
+                exec_paralelo(&tokens[2], ntokens-2);
+                continue;
+            }
+            if(ntokens!=2){ //run simples aceita exatamente 1 nome
                 fprintf(stderr, "processflow: uso: run <nome>\n");
                 continue;
             }
@@ -73,6 +89,5 @@ int main(int argc, char *argv[]){
         }
         fprintf(stderr, "processflow: comando desconhecido %s\n", tokens[0]);
     }
-
     return 0;
 }

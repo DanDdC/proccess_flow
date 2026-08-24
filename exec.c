@@ -14,7 +14,7 @@ static void montar_argv(Task *t, char *argv[MAX_ARGS+1]){ //monta o formato que 
     argv[t->argc] = NULL;
 }
 
-static pid_t lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai
+pid_t exec_lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai (pública: job.c também usa)
     char *argv[MAX_ARGS+1];
     montar_argv(t, argv);
 
@@ -33,7 +33,7 @@ static pid_t lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai
 }
 
 int exec_rodar(Task *t){
-    pid_t pid = lancar(t);
+    pid_t pid = exec_lancar(t);
     if(pid<0){ //nem nasceu
         return -1;
     }
@@ -71,7 +71,7 @@ int exec_paralelo(char **nomes, int n){
             fprintf(stderr, "processflow: tarefa '%s' não existe\n", nomes[i]);
             continue;
         }
-        pid_t pid = lancar(t);
+        pid_t pid = exec_lancar(t);
         if(pid>0){
             npids++;
         }

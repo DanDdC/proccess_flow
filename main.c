@@ -7,6 +7,7 @@
 #include "task.h"
 #include "exec.h"
 #include "redirect.h"
+#include "job.h"
 
 #define MAX_LINHA 1024
 #define MAX_TOKENS 32
@@ -32,6 +33,8 @@ int main(int argc, char *argv[]){
     }
     
     while(true){
+        job_colher_zumbis(); //colhe jobs terminados desde a última volta
+
         if(interativo){ //prompt só no modo interativo
             printf("processflow> ");
             fflush(stdout);
@@ -100,6 +103,35 @@ int main(int argc, char *argv[]){
             if(chdir(tokens[1])<0){ //erro não-fatal: avisa e segue
                 fprintf(stderr, "processflow: %s: diretório não existe\n", tokens[1]);
             }
+            continue;
+        }
+
+        if(strcmp(tokens[0], "start")==0){
+            if(ntokens!=2){ //exatamente 1 tarefa
+                fprintf(stderr, "processflow: uso: start <tarefa>\n");
+                continue;
+            }
+            Task *t = task_buscar(tokens[1]);
+            if(t==NULL){ //erro não-fatal
+                fprintf(stderr, "processflow: tarefa '%s' não existe\n", tokens[1]);
+                continue;
+            }
+            job_iniciar(t);
+            continue;
+        }
+
+        if(strcmp(tokens[0], "jobs")==0){
+            job_listar(); //nenhum argumento
+            continue;
+        }
+
+        if(strcmp(tokens[0], "wait")==0){
+            int id;
+            if(ntokens!=2 || sscanf(tokens[1], "%d", &id)!=1){ //exige um número de verdade
+                fprintf(stderr, "processflow: uso: wait <jobId>\n");
+                continue;
+            }
+            job_esperar(id);
             continue;
         }
 

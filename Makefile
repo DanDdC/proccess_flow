@@ -13,4 +13,7 @@ processflow: $(OBJS)
 clean:
 	rm -f processflow $(OBJS)
 
+test: processflow
+	bash run_tests.sh
+
 .PHONY: all clean test

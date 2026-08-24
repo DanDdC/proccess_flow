@@ -53,6 +53,14 @@ processflow> exit
 
 Um fluxo completo de exemplo está em `workflow.pf`.
 
+## Como testar
+
+```bash
+make test
+```
+
+Roda a suíte própria (`run_tests.sh`), autocontida: cria os próprios casos em `/tmp` e verifica os comportamentos centrais do interpretador (erros não-fatais, workflow fatal, ordem do sequential, timing do paralelo, pipeline, redirecionamentos combinados, append, workdir, aviso de código de saída ≠ 0, comentários e ciclo de jobs).
+
 ## Estrutura do projeto
 
 | Arquivo | Responsabilidade |
@@ -63,11 +71,12 @@ Um fluxo completo de exemplo está em `workflow.pf`.
 | `redirect.h/.c` | configuração e aplicação de redirecionamento de E/S no filho |
 | `job.h/.c` | tabela de jobs em background, coleta de zumbis, start/jobs/wait |
 | `workflow.pf` | exemplo de fluxo |
+| `run_tests.sh` | suíte própria de verificação (alvo `test`) |
 | `Makefile` | targets `all`, `clean`, `test` |
 
 ## Decisões técnicas principais
 
-- **Vetores fixos, sem alocação dinâmica**: limites claros (`MAX_TAREFAS=32`, `MAX_ARGS=16`), reduzindo o risco de memory leak;
+- **Vetores fixos, sem alocação dinâmica**: limites claros (`MAX_TAREFAS=32`, `MAX_ARGS=32`), reduzindo o risco de memory leak;
 - **`execvp`**: busca o programa no PATH, então `/bin/echo` e `echo` funcionam igualmente;
 - **Filho usa `_exit(127)`** quando `execvp` falha, para não despejar buffers duplicados;
 - **Pipeline aborta a cadeia inteira se qualquer elo não existe** (um furo quebraria o fluxo); já o `sequential` apenas pula o elo faltante e continua;

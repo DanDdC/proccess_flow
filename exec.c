@@ -14,6 +14,12 @@ static void montar_argv(Task *t, char *argv[MAX_ARGS+1]){ //monta o formato que 
     argv[t->argc] = NULL;
 }
 
+static void avisar_status(const char *quem, int status){ //aviso pra processo que falhou
+    if(WIFEXITED(status) && WEXITSTATUS(status)!=0){
+        fprintf(stderr, "processflow: aviso: '%s' terminou com código %d\n", quem, WEXITSTATUS(status));
+    }
+}
+
 pid_t exec_lancar(Task *t){ //fork+execvp; devolve o pid do filho no pai (pública: job.c também usa)
     char *argv[MAX_ARGS+1];
     montar_argv(t, argv);
@@ -45,6 +51,7 @@ int exec_rodar(Task *t){
     }
 
     if(WIFEXITED(status)){
+        avisar_status(t->nome, status); //avisa antes de devolver o código
         return WEXITSTATUS(status); //devolve o código do filho
     }
     return -1; //morreu por sinal
@@ -79,10 +86,14 @@ int exec_paralelo(char **nomes, int n){
 
     for(int i=0; i<npids; i++){ //fase 2: colhe TODOS, em qualquer ordem
         int status;
-        if(waitpid(-1, &status, 0)<0){ //-1: qualquer filho morto serve
+        pid_t p = waitpid(-1, &status, 0); //-1: qualquer filho morto serve
+        if(p<0){
             perror("processflow: waitpid");
             break;
         }
+        char quem[32]; //sem mapa pid→nome aqui: avisa pelo pid mesmo
+        snprintf(quem, sizeof(quem), "pid %d", (int)p);
+        avisar_status(quem, status);
     }
     return 0;
 }
@@ -143,7 +154,12 @@ int exec_pipeline(char **nomes, int n){
 
     int status; //colhe exatamente quantos lançou
     for(int i=0; i<n; i++){
-        waitpid(-1, &status, 0);
+        pid_t p = waitpid(-1, &status, 0);
+        if(p>0){ //mesmo aviso de falha do paralelo
+            char quem[32];
+            snprintf(quem, sizeof(quem), "pid %d", (int)p);
+            avisar_status(quem, status);
+        }
     }
     return 0;
 }

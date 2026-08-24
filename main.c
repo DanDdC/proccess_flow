@@ -64,6 +64,9 @@ int main(int argc, char *argv[]){
         if(ntokens==0){
             continue;
         }
+        if(tokens[0][0]=='#'){
+            continue;
+        }
 
         if(strcmp(tokens[0], "exit")==0){
             break;
@@ -71,7 +74,7 @@ int main(int argc, char *argv[]){
 
         if(strcmp(tokens[0], "task")==0){
             if(ntokens<3){ //minimo seria task + nome + programa
-                fprintf(stderr, "processflow: uso: task <nome> <programas> [args]\n");
+                fprintf(stderr, "processflow: uso: task <nome> <programa> [args]\n");
                 continue;
             }
             task_cadastrar(tokens[1], &tokens[2], ntokens-2);

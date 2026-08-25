@@ -1,0 +1,17 @@
+#exemplo de fluxo de trabalho do ProcessFlow
+#cadastra as tarefas
+task ola /bin/echo OLA MUNDO
+task nums /usr/bin/seq 5 -1 1
+task ordena /usr/bin/sort
+task mostra /bin/cat
+
+#execucao simples
+run ola
+
+#cadeia sequencial
+run sequential ola
+
+#pipeline: gera 5..1, ordena e mostra
+run pipe nums ordena mostra
+
+exit

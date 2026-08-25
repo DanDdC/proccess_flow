@@ -1,0 +1,53 @@
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ date
+Mon Aug 24 22:45:15 -03 2026
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ whoami
+danie
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ pwd
+/home/danie/proccess_flow
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ ls
+Makefile   exec.c  job.c  main.c      redirect.h    task.c  workflow.pf
+README.md  exec.h  job.h  redirect.c  run_tests.sh  task.h
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ make clean
+rm -f processflow main.o task.o exec.o redirect.o job.o
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ make
+gcc -Wall -Wextra -std=c99 -c main.c -o main.o
+gcc -Wall -Wextra -std=c99 -c task.c -o task.o
+gcc -Wall -Wextra -std=c99 -c exec.c -o exec.o
+gcc -Wall -Wextra -std=c99 -c redirect.c -o redirect.o
+gcc -Wall -Wextra -std=c99 -c job.c -o job.o
+gcc -Wall -Wextra -std=c99 main.o task.o exec.o redirect.o job.o -o processflow
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ make test
+bash run_tests.sh
+PASS: erros nao-fatais (dup/uso/desconhecido/inexistente)
+PASS: run simples executa
+PASS: workflow inexistente é fatal (rc=1)
+PASS: programa inexistente reportado
+PASS: sequential em ordem
+PASS: parallel ~1s (1008ms)
+PASS: pipe ordena 5..1
+PASS: input+output
+PASS: append acumula 2 linhas
+PASS: workdir muda diretorio
+PASS: aviso de exit code != 0
+PASS: comentario # sem ruido
+PASS: start imprime jobId
+PASS: job inexistente nao-fatal
+-----------------------------------
+suite: 14 PASS, 0 FAIL
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ printf '#demo do ProcessFlow\ntask ola /bin/echo OLA-PROCESSFLOW\ntask n /usr/bin/seq 5 -1 1\ntask s /usr/bin/sort\ntask c /bin/cat\nrun ola\nrun pipe n s c\nexit\n' > demo.pf
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ ./processflow demo.pf
+#demo do ProcessFlow
+task ola /bin/echo OLA-PROCESSFLOW
+task n /usr/bin/seq 5 -1 1
+task s /usr/bin/sort
+task c /bin/cat
+run ola
+OLA-PROCESSFLOW
+run pipe n s c
+1
+2
+3
+4
+5
+exit
+[01;32mdanie@ubuntu[00m:[01;34m~/proccess_flow[00m\$ 
